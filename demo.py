@@ -5,6 +5,7 @@ Simple demo script to test the criminal face generator
 
 from criminal_face_generator import CriminalFaceGenerator
 
+
 def interactive_demo():
     """Interactive demo allowing user input"""
     generator = CriminalFaceGenerator()
@@ -32,7 +33,9 @@ def interactive_demo():
             crime_type = input("Enter crime type (optional): ").strip() or None
             location = input("Enter location (optional): ").strip() or None
 
-            similar_faces = generator.search_similar_faces(description, crime_type, location)
+            similar_faces = generator.search_similar_faces(
+                description, crime_type, location
+            )
 
             if similar_faces:
                 print(f"\nFound {len(similar_faces)} similar faces:")
@@ -51,6 +54,7 @@ def interactive_demo():
 
         else:
             print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     interactive_demo()
