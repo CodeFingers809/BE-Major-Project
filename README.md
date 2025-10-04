@@ -1,99 +1,116 @@
 # Criminal Face Generation System
 
-A research-focused system for generating realistic criminal faces from witness descriptions, optimized for Indian facial features and law enforcement applications.
+A research prototype for generating criminal face composites from witness descriptions, optimized for Indian facial features and law enforcement use.
 
 ## Overview
 
-This project implements a three-stage workflow for criminal face generation:
-1. **Text to Sketch** - Generate black and white police sketches from descriptions
-2. **Sketch Refinement** - Iteratively improve sketches with additional details
-3. **Sketch to Color** - Convert final sketches to realistic mugshot-style colored images
+Modern web application with a guided workflow:
+1. **Feature Selection** - Step-by-step selection of 9 facial characteristics
+2. **Sketch Generation** - AI creates sketch from layered features with refinement options
+3. **Colorization** - Applies realistic colors while preserving exact sketch structure
 
-The system is designed as a proof-of-concept for academic research rather than production deployment.
-
-## Features
-
-- 🎯 Optimized for Indian facial features and skin tones
-- 📝 Natural language description input
-- 🖼️ Three-stage image generation pipeline
-- 🔄 Iterative sketch refinement
-- 💾 Session state management and image downloads
-- 🌐 Web interface built with Streamlit
+The system uses a React frontend with a Flask backend API, replacing the deprecated Streamlit interface.
 
 ## Quick Start
 
 ### Prerequisites
 
-- Python 3.7+
+- Python 3.8+
+- Node.js 18+
+- npm or yarn
 - Internet connection (for Pollinations.ai API)
 
-### Installation
+### Installation & Running
 
-1. Clone the repository:
+#### 1. Backend Setup
 ```bash
-git clone <repository-url>
-cd BE\ PROJECT
-```
-
-2. Install dependencies:
-```bash
+cd backend
 pip install -r requirements.txt
+python app.py
 ```
+Backend API runs on `http://localhost:5000`
 
-### Usage
-
-#### Web Application
+#### 2. Frontend Setup
 ```bash
-# Launch Streamlit web interface
+cd frontend
+npm install
+npm run dev
+```
+Frontend runs on `http://localhost:3000`
+
+Open `http://localhost:3000` in your browser to use the application.
+
+### Legacy Applications (Deprecated)
+```bash
+# Old Streamlit interface (kept for reference)
 streamlit run streamlit_app.py
 
-# Or use helper script
-python run_app.py
-```
-
-#### Command Line Interface
-```bash
-# Basic CLI demo
+# Command line demos
 python criminal_face_generator.py
-
-# Interactive demo
 python demo.py
 ```
+
+## Workflow
+
+### 1. Feature Selection
+User selects options across 9 categories:
+- Face shape (oval, round, square, diamond, heart, oblong)
+- Eye shape (almond, round, hooded, upturned, downturned, monolid)
+- Nose type (straight, aquiline, button, broad, narrow, roman)
+- Mouth shape (full, thin, wide, small, bow, downturned)
+- Eyebrows (straight, arched, rounded, angled, bushy, thin)
+- Complexion (fair, wheatish, dusky, dark)
+- Hair type (straight black, curly, wavy, receding, bald)
+- Facial hair (clean shaven, mustache, beard, goatee, stubble)
+- Distinctive marks (scars, moles, birthmarks, etc.)
+
+Selected features are layered into a composite base image.
+
+### 2. Sketch Generation
+- AI generates initial sketch from composite + description
+- Text-based refinement with additional details
+- Manual editing: download sketch → edit externally → re-upload
+- Version history tracks all iterations
+
+### 3. Colorization
+- Final approved sketch is colorized
+- Preserves exact sketch structure (critical)
+- Applies realistic Indian skin tones and mugshot-style rendering
+- No face regeneration, only colorization
 
 ## Project Structure
 
 ```
-├── streamlit_app.py          # Main Streamlit web application
-├── criminal_face_generator.py # Core functionality and CLI demo
-├── demo.py                   # Interactive command line demo
-├── run_app.py               # Helper script to launch Streamlit
-├── requirements.txt         # Python dependencies
-├── CLAUDE.md               # Development guidelines
-└── README.md               # This file
+/backend                      # Flask REST API
+  ├── app.py                 # API endpoints
+  ├── generator.py           # Sketch & colorization logic
+  ├── compositor.py          # Feature layering
+  └── requirements.txt       # Python dependencies
+
+/frontend                     # React + Vite UI
+  ├── src/
+  │   ├── components/
+  │   │   ├── FeatureSelector.jsx
+  │   │   ├── SketchCanvas.jsx
+  │   │   └── ColorPanel.jsx
+  │   ├── App.jsx
+  │   └── main.jsx
+  ├── package.json
+  └── vite.config.js
+
+streamlit_app.py             # [DEPRECATED] Legacy Streamlit UI
+criminal_face_generator.py   # Legacy CLI demo
+requirements.txt             # Root dependencies
+CLAUDE.md                    # Detailed technical docs
 ```
 
-## Technical Details
+## Technical Stack
 
-### Architecture
-
-- **Core Class**: `CriminalFaceSketchGenerator` handles image generation logic
-- **API Backend**: Pollinations.ai free image generation service
-- **Frontend**: Streamlit three-column workflow interface
-- **Image Processing**: PIL for image handling and downloads
-
-### Prompt Engineering
-
-The system uses carefully crafted prompts for each generation stage:
-
-- **Sketch Generation**: Focuses on police sketch aesthetics with Indian features
-- **Color Generation**: Produces mugshot-style photographs with realistic lighting
-
-### Key Dependencies
-
-- `streamlit` - Web application framework
-- `requests` - HTTP API communication
-- `Pillow` - Image processing
-- `pollinations.ai` - Image generation API (no auth required)
+- **Frontend**: React 18, Vite, Tailwind CSS
+- **Backend**: Flask, Flask-CORS
+- **Image Processing**: PIL/Pillow
+- **API**: Pollinations.ai (free, no auth)
+- **HTTP Client**: Axios (frontend), Requests (backend)
 
 ## Research Context
 

@@ -1,90 +1,71 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## BE Final Year Major Project
-This folder contains the files for the final year major project for 4 year engineering students.
-This project should be approached from a research perspective rather than a product making perspective.
-We are going to have to write an entire research paper on this project after this is finished.
+Criminal face generation research prototype for law enforcement. Creates faces from witness descriptions with Indian-optimized features. Research-focused, not production.
 
-## Project Overview
-Criminal face generation system that creates realistic faces from witness descriptions. The system follows a specific workflow: text description → sketch generation → sketch refinement → final colored image generation.
+## Architecture
+- **Frontend**: React + Vite + Tailwind (`/frontend`)
+- **Backend**: Flask REST API (`/backend`)
+- **Legacy**: Streamlit app (deprecated)
 
-The project is optimized for Indian facial features and realistic mugshot-style images suitable for law enforcement use.
+## Running the App
 
-## Current Implementation
-The prototype currently consists of:
-- **Streamlit Web Application** (`streamlit_app.py`) - Main user interface
-- **Command Line Demo** (`criminal_face_generator.py`) - Basic functionality testing
-- **Interactive Demo** (`demo.py`) - Command line interface for testing
-
-## Development Commands
-
-### Running the Application
+### Backend
 ```bash
-# Install dependencies
+cd backend
 pip install -r requirements.txt
-
-# Run Streamlit web app
-streamlit run streamlit_app.py
-
-# Or use the helper script
-python run_app.py
-
-# Run command line demo
-python criminal_face_generator.py
-
-# Interactive command line demo
-python demo.py
+python app.py  # http://127.0.0.1:5001
 ```
 
-## Technical Architecture
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev  # http://localhost:3000
+```
 
-### Core Components
-1. **CriminalFaceSketchGenerator** - Main class handling image generation
-2. **Streamlit UI** - Three-column workflow interface
-3. **API Integration** - Uses Pollinations.ai free image generation API
+## Workflow
+1. **Feature Selection**: 9-step guided selection (face shape, eyes, nose, mouth, eyebrows, complexion, hair, facial hair, marks)
+2. **Sketch Generation**: AI creates sketch from layered features + allows refinement and manual editing
+3. **Colorization**: Colors final sketch (preserves structure, NO regeneration)
 
-### Workflow Implementation
-1. **Text to Sketch**: Generates black and white police sketches from descriptions
-2. **Sketch Refinement**: Allows iterative improvements with additional details
-3. **Sketch to Color**: Converts final sketch to realistic mugshot-style colored image
+## Key Files
+- `backend/app.py` - Flask API endpoints
+- `backend/generator.py` - Sketch & color generation
+- `backend/compositor.py` - Feature layering
+- `frontend/src/components/FeatureSelector.jsx` - Step 1 UI
+- `frontend/src/components/SketchCanvas.jsx` - Step 2 UI
+- `frontend/src/components/ColorPanel.jsx` - Step 3 UI
 
-### Key Features
-- Indian-specific facial feature selection (complexion, hair, facial hair, distinctive marks)
-- Session state management for sketch history
-- Image download functionality
-- Real-time generation with progress indicators
+## Tech Stack
+- React 18, Vite, Tailwind CSS
+- Flask, Flask-CORS
+- PIL/Pillow
+- Pollinations.ai API (free, no auth)
 
-## Prompt Engineering
+## Critical Constraints
+- Research prototype, not production code
+- Indian facial features optimization required
+- Mugshot-style rendering (harsh lighting, plain background)
+- Colorization MUST preserve sketch structure exactly
+- TPU compatibility for future ML components
 
-### Sketch Generation Prompts
-Use format: `"black and white pencil sketch of an Indian person, {description}, police sketch artist drawing, detailed facial features, South Asian features, realistic proportions, line art sketch on paper, monochrome drawing, criminal identification sketch"`
+## Prompt Templates
 
-### Colored Image Prompts
-Use format: `"police mugshot photograph of an Indian person, {description}, frontal view, neutral expression, harsh police station lighting, plain background, realistic Indian skin tone, South Asian facial features, criminal booking photo, high resolution, sharp focus, documentary photography style"`
+**Sketch**: `"black and white pencil sketch of an Indian person, {description}, police sketch artist drawing, detailed facial features, South Asian features, realistic proportions, line art sketch on paper, monochrome drawing, criminal identification sketch"`
 
-## Important Constraints
-- Focus on research/proof-of-concept rather than production-ready code
-- TPU compatibility required for future ML components
-- Generate realistic Indian faces with appropriate skin tones and features
-- Maintain mugshot-style lighting and backgrounds (not studio quality)
-- Context preservation for iterative face refinement is critical
-- Avoid overly polished or AI-generated language in the interface
-
-## API Dependencies
-- **Pollinations.ai**: Free image generation API (no authentication required)
-- **Streamlit**: Web application framework
-- **PIL**: Image processing
-- **Requests**: HTTP requests for API calls
+**Color**: `"police mugshot photograph of an Indian person, {description}, frontal view, neutral expression, harsh police station lighting, plain background, realistic Indian skin tone, South Asian facial features, criminal booking photo, high resolution, sharp focus, documentary photography style"`
 
 ## File Structure
 ```
-/
-├── streamlit_app.py          # Main Streamlit web application
-├── criminal_face_generator.py # Core functionality and CLI demo
-├── demo.py                   # Interactive command line demo
-├── run_app.py               # Helper script to launch Streamlit
-├── requirements.txt         # Python dependencies
-└── CLAUDE.md               # This file
+backend/          # Flask API
+frontend/         # React UI
+streamlit_app.py  # [DEPRECATED]
+*.py              # Legacy demos
 ```
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless absolutely necessary.
+ALWAYS prefer editing existing files.
+NEVER proactively create documentation files.
