@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# custom
+FS2K
+
 # C extensions
 *.so
 
