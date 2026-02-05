@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criminal Face Generator - Law Enforcement Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+        }
+
+        h1 {
+            color: #dc3545;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        .features-panel {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+
+        .canvas-panel {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .category {
+            margin-bottom: 30px;
+        }
+
+        .category-title {
+            color: #dc3545;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3a3a3a;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .feature-card {
+            background: #1a1a1a;
+            border: 2px solid #3a3a3a;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            border-color: #dc3545;
+            transform: translateY(-2px);
+        }
+
+        .feature-card.selected {
+            border-color: #dc3545;
+            background: #2a1a1a;
+        }
+
+        .feature-image {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            background: #3a3a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .feature-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+
+        .canvas-container {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        #compositeCanvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #4a4a4a;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .selected-count {
+            background: #3a3a3a;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #dc3545;
+        }
+
+        .result-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a4a4a;
+        }
+    </style>
+</head>
+<body>
+    {% load static %}
+    <div class="container">
+        <header>
+            <h1>Criminal Face Generator</h1>
+            <p class="subtitle">Law Enforcement Identification Tool - Research Prototype</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="features-panel" id="featuresPanel">
+                <div class="loading">Loading features...</div>
+            </div>
+
+            <div class="canvas-panel">
+                <div class="selected-count" id="selectedCount">
+                    No features selected
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="compositeCanvas" width="512" height="512"></canvas>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="copyPromptBtn" disabled>
+                        Copy Prompt
+                    </button>
+                    <button class="btn btn-primary" id="generateBtn" disabled>
+                        Generate Sketch
+                    </button>
+                    <button class="btn btn-secondary" id="clearBtn">
+                        Clear Selection
+                    </button>
+                </div>
+
+                <div id="promptDisplay" style="display: none; background: #1a1a1a; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 12px; color: #888; max-height: 100px; overflow-y: auto;"></div>
+
+                <div id="resultContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,5 +1,12 @@
-requests>=2.31.0
-pillow>=10.0.0
-numpy>=1.24.0
-flask>=3.0.0
-flask-cors>=4.0.0
+django>=5.2
+djangorestframework>=3.16
+django-cors-headers>=4.9
+pillow>=11.0
+requests>=2.32
+
+# MLX for Apple Silicon optimized inference
+mlx>=0.20.0
+mlx-lm>=0.20.0
+
+# MFLUX for Flux image generation on M-series chips
+mflux>=0.11.0
