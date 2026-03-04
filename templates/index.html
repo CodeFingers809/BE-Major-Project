@@ -1,262 +1,773 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criminal Face Generator - Law Enforcement Tool</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Criminal Face Generator - Law Enforcement Tool</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a1a;
-            color: #e0e0e0;
-            padding: 20px;
-        }
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: #1a1a1a;
+                color: #e0e0e0;
+                height: 100vh;
+                overflow: hidden;
+            }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+            .app-layout {
+                display: grid;
+                grid-template-rows: auto 1fr;
+                height: 100vh;
+            }
 
-        header {
-            background: #2a2a2a;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #dc3545;
-        }
+            header {
+                background: #2a2a2a;
+                padding: 14px 24px;
+                border-bottom: 3px solid #dc3545;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
 
-        h1 {
-            color: #dc3545;
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
+            h1 {
+                color: #dc3545;
+                font-size: 22px;
+            }
+            .subtitle {
+                color: #888;
+                font-size: 13px;
+            }
 
-        .subtitle {
-            color: #888;
-            font-size: 14px;
-        }
+            .main-grid {
+                display: grid;
+                grid-template-columns: 220px 1fr 400px;
+                height: 100%;
+                overflow: hidden;
+            }
 
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 20px;
-        }
+            /* ── LEFT SIDEBAR: HISTORY ── */
+            .history-sidebar {
+                background: #222;
+                border-right: 1px solid #333;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
 
-        .features-panel {
-            background: #2a2a2a;
-            border-radius: 8px;
-            padding: 20px;
-            max-height: calc(100vh - 180px);
-            overflow-y: auto;
-        }
+            .sidebar-header {
+                padding: 14px 16px;
+                font-weight: 600;
+                font-size: 14px;
+                color: #dc3545;
+                border-bottom: 1px solid #333;
+                flex-shrink: 0;
+            }
 
-        .canvas-panel {
-            background: #2a2a2a;
-            border-radius: 8px;
-            padding: 20px;
-            position: sticky;
-            top: 20px;
-        }
+            .history-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px;
+            }
 
-        .category {
-            margin-bottom: 30px;
-        }
+            .history-item {
+                padding: 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                margin-bottom: 4px;
+                border: 1px solid transparent;
+                transition: all 0.15s;
+            }
 
-        .category-title {
-            color: #dc3545;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #3a3a3a;
-        }
+            .history-item:hover {
+                background: #2a2a2a;
+                border-color: #444;
+            }
+            .history-item.active {
+                border-color: #dc3545;
+                background: #2a1a1a;
+            }
 
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
-        }
+            .history-item .hi-version {
+                font-size: 12px;
+                font-weight: 600;
+                color: #dc3545;
+            }
 
-        .feature-card {
-            background: #1a1a1a;
-            border: 2px solid #3a3a3a;
-            border-radius: 6px;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
+            .history-item .hi-type {
+                font-size: 11px;
+                color: #888;
+                text-transform: uppercase;
+            }
 
-        .feature-card:hover {
-            border-color: #dc3545;
-            transform: translateY(-2px);
-        }
+            .history-item .hi-time {
+                font-size: 10px;
+                color: #555;
+                margin-top: 2px;
+            }
 
-        .feature-card.selected {
-            border-color: #dc3545;
-            background: #2a1a1a;
-        }
+            .history-item .hi-thumb {
+                width: 100%;
+                height: 80px;
+                object-fit: cover;
+                border-radius: 4px;
+                margin-top: 6px;
+                background: #333;
+            }
 
-        .feature-image {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            background: #3a3a3a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: #666;
-        }
+            .history-empty {
+                padding: 20px 16px;
+                text-align: center;
+                color: #555;
+                font-size: 12px;
+            }
 
-        .feature-name {
-            font-size: 13px;
-            font-weight: 500;
-            color: #e0e0e0;
-        }
+            /* ── GROUPED HISTORY ── */
+            .history-group {
+                margin-bottom: 8px;
+                border: 1px solid #333;
+                border-radius: 6px;
+                overflow: hidden;
+            }
 
-        .canvas-container {
-            width: 100%;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            position: relative;
-        }
+            .history-group.active-group {
+                border-color: #dc3545;
+            }
 
-        #compositeCanvas {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 8px;
-        }
+            .hg-header {
+                padding: 8px 10px;
+                background: #2a2a2a;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                user-select: none;
+            }
 
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+            .hg-header:hover {
+                background: #333;
+            }
 
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+            .hg-id {
+                font-size: 12px;
+                font-weight: 600;
+                color: #dc3545;
+            }
 
-        .btn-primary {
-            background: #dc3545;
-            color: white;
-        }
+            .hg-date {
+                font-size: 10px;
+                color: #666;
+            }
 
-        .btn-primary:hover {
-            background: #c82333;
-        }
+            .hg-versions {
+                padding: 4px;
+            }
 
-        .btn-secondary {
-            background: #3a3a3a;
-            color: #e0e0e0;
-        }
+            .history-group.collapsed .hg-versions {
+                display: none;
+            }
 
-        .btn-secondary:hover {
-            background: #4a4a4a;
-        }
+            /* ── CENTER: FEATURES ── */
+            .features-panel {
+                background: #1e1e1e;
+                overflow: hidden;
+            }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+            .category {
+                margin-bottom: 28px;
+            }
 
-        .selected-count {
-            background: #3a3a3a;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #888;
-        }
+            .category-title {
+                color: #dc3545;
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 12px;
+                padding-bottom: 6px;
+                border-bottom: 2px solid #333;
+            }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #dc3545;
-        }
+            .features-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 10px;
+            }
 
-        .result-image {
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
+            .feature-card {
+                background: #252525;
+                border: 2px solid #333;
+                border-radius: 6px;
+                padding: 10px;
+                cursor: pointer;
+                transition: all 0.15s;
+                text-align: center;
+            }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
+            .feature-card:hover {
+                border-color: #dc3545;
+                transform: translateY(-1px);
+            }
+            .feature-card.selected {
+                border-color: #dc3545;
+                background: #2a1a1a;
+            }
 
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
+            .feature-card img {
+                width: 100%;
+                height: 80px;
+                object-fit: cover;
+                border-radius: 4px;
+                margin-bottom: 6px;
+            }
 
-        ::-webkit-scrollbar-thumb {
-            background: #3a3a3a;
-            border-radius: 4px;
-        }
+            .feature-name {
+                font-size: 12px;
+                font-weight: 500;
+                color: #ddd;
+            }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4a4a4a;
-        }
-    </style>
-</head>
-<body>
-    {% load static %}
-    <div class="container">
-        <header>
-            <h1>Criminal Face Generator</h1>
-            <p class="subtitle">Law Enforcement Identification Tool - Research Prototype</p>
-        </header>
+            /* ── RIGHT: CANVAS PANEL ── */
+            .canvas-panel {
+                background: #2a2a2a;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                border-left: 1px solid #333;
+            }
 
-        <div class="main-grid">
-            <div class="features-panel" id="featuresPanel">
-                <div class="loading">Loading features...</div>
-            </div>
+            .canvas-top {
+                flex: 1;
+                overflow-y: auto;
+                padding: 16px;
+            }
 
-            <div class="canvas-panel">
-                <div class="selected-count" id="selectedCount">
-                    No features selected
+            .canvas-container {
+                position: relative;
+                background: #fff;
+                border-radius: 8px;
+                overflow: hidden;
+                margin-bottom: 12px;
+            }
+
+            #resultImage {
+                width: 100%;
+                display: block;
+                border-radius: 8px;
+            }
+
+            #drawingCanvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                cursor: crosshair;
+                display: none;
+            }
+
+            .canvas-placeholder {
+                width: 100%;
+                aspect-ratio: 3/4;
+                background: #1a1a1a;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #555;
+                font-size: 14px;
+            }
+
+            .draw-toolbar {
+                display: none;
+                gap: 6px;
+                align-items: center;
+                padding: 8px;
+                background: #1e1e1e;
+                border-radius: 6px;
+                margin-bottom: 10px;
+            }
+
+            .draw-toolbar.visible {
+                display: flex;
+            }
+
+            .draw-toolbar label {
+                font-size: 11px;
+                color: #888;
+            }
+            .draw-toolbar input[type="range"] {
+                width: 60px;
+            }
+
+            .draw-toolbar .color-btn {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                border: 2px solid transparent;
+                cursor: pointer;
+            }
+
+            .draw-toolbar .color-btn.active {
+                border-color: #dc3545;
+            }
+
+            .revision-area {
+                margin-bottom: 10px;
+            }
+
+            .revision-area textarea {
+                width: 100%;
+                background: #1a1a1a;
+                border: 1px solid #444;
+                color: #e0e0e0;
+                border-radius: 6px;
+                padding: 10px;
+                font-size: 13px;
+                resize: vertical;
+                min-height: 60px;
+                font-family: inherit;
+            }
+
+            .revision-area textarea::placeholder {
+                color: #555;
+            }
+
+            .canvas-actions {
+                flex-shrink: 0;
+                padding: 12px 16px;
+                border-top: 1px solid #333;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn-row {
+                display: flex;
+                gap: 8px;
+            }
+            .btn-row .btn {
+                flex: 1;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                border: none;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+
+            .btn-primary {
+                background: #dc3545;
+                color: white;
+            }
+            .btn-primary:hover {
+                background: #c82333;
+            }
+            .btn-secondary {
+                background: #3a3a3a;
+                color: #e0e0e0;
+            }
+            .btn-secondary:hover {
+                background: #4a4a4a;
+            }
+            .btn-outline {
+                background: transparent;
+                color: #dc3545;
+                border: 1px solid #dc3545;
+            }
+            .btn-outline:hover {
+                background: #dc3545;
+                color: white;
+            }
+            .btn:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+
+            .status-bar {
+                padding: 8px 12px;
+                font-size: 12px;
+                color: #888;
+                background: #1e1e1e;
+                border-radius: 6px;
+                margin-bottom: 10px;
+                display: none;
+            }
+
+            .status-bar.visible {
+                display: block;
+            }
+            .status-bar.error {
+                color: #dc3545;
+            }
+            .status-bar.loading {
+                color: #f0ad4e;
+            }
+
+            #promptDisplay {
+                background: #1a1a1a;
+                padding: 10px;
+                border-radius: 6px;
+                font-size: 11px;
+                color: #666;
+                max-height: 80px;
+                overflow-y: auto;
+                margin-bottom: 10px;
+                display: none;
+            }
+
+            .loading-text {
+                text-align: center;
+                padding: 40px 20px;
+                color: #888;
+            }
+
+            /* ── USER INPUT SECTION ── */
+            .user-input-section {
+                padding: 16px 20px;
+                border-top: 2px solid #333;
+                background: #1e1e1e;
+            }
+
+            .user-input-section h3 {
+                font-size: 14px;
+                color: #dc3545;
+                margin-bottom: 10px;
+                font-weight: 600;
+            }
+
+            .user-input-section textarea {
+                width: 100%;
+                background: #252525;
+                border: 1px solid #444;
+                color: #e0e0e0;
+                border-radius: 6px;
+                padding: 10px;
+                font-size: 13px;
+                resize: vertical;
+                min-height: 50px;
+                font-family: inherit;
+                margin-bottom: 10px;
+            }
+
+            .user-input-section textarea::placeholder {
+                color: #555;
+            }
+
+            .ref-upload-area {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 6px;
+            }
+
+            .ref-upload-btn {
+                padding: 6px 12px;
+                background: #3a3a3a;
+                color: #e0e0e0;
+                border: 1px dashed #555;
+                border-radius: 6px;
+                font-size: 12px;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: all 0.15s;
+            }
+
+            .ref-upload-btn:hover {
+                border-color: #dc3545;
+                color: #dc3545;
+            }
+
+            .ref-preview {
+                max-width: 80px;
+                max-height: 60px;
+                border-radius: 4px;
+                display: none;
+                object-fit: cover;
+                border: 1px solid #444;
+            }
+
+            /* ── CRIMINAL MATCHES ── */
+            .match-section {
+                display: none;
+                margin-top: 12px;
+                border-top: 1px solid #444;
+                padding-top: 10px;
+            }
+
+            .match-section h3 {
+                font-size: 14px;
+                color: #dc3545;
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .match-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+                max-height: 250px;
+                overflow-y: auto;
+            }
+
+            .match-card {
+                background: #1e1e1e;
+                border: 1px solid #333;
+                border-radius: 6px;
+                padding: 6px;
+                text-align: center;
+                transition: border-color 0.15s;
+            }
+
+            .match-card:hover {
+                border-color: #dc3545;
+            }
+
+            .match-rank {
+                font-size: 10px;
+                font-weight: 700;
+                color: #dc3545;
+                margin-bottom: 2px;
+            }
+
+            .match-img {
+                width: 100%;
+                height: 50px;
+                object-fit: cover;
+                border-radius: 3px;
+                background: #333;
+            }
+
+            .match-id {
+                font-size: 9px;
+                color: #aaa;
+                margin-top: 3px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .match-score {
+                font-size: 10px;
+                font-weight: 600;
+                color: #f0ad4e;
+            }
+
+            .match-loading {
+                grid-column: 1 / -1;
+                text-align: center;
+                color: #888;
+                padding: 20px;
+                font-size: 12px;
+            }
+
+            /* scrollbar */
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #3a3a3a;
+                border-radius: 3px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+        </style>
+    </head>
+    <body>
+        {% load static %}
+        <div class="app-layout">
+            <header>
+                <h1>Criminal Face Generator</h1>
+                <span class="subtitle">
+                    Law Enforcement Identification Tool
+                </span>
+            </header>
+
+            <div class="main-grid">
+                <!-- LEFT: History sidebar -->
+                <div class="history-sidebar">
+                    <div class="sidebar-header">Version History</div>
+                    <div class="history-list" id="historyList">
+                        <div class="history-empty">No generations yet</div>
+                    </div>
                 </div>
 
-                <div class="canvas-container">
-                    <canvas id="compositeCanvas" width="512" height="512"></canvas>
+                <!-- CENTER: Feature selection -->
+                <div
+                    class="features-panel"
+                    style="display: flex; flex-direction: column"
+                >
+                    <div
+                        id="featuresPanel"
+                        style="flex: 1; overflow-y: auto; padding: 20px"
+                    >
+                        <div class="loading-text">Loading features...</div>
+                    </div>
+                    <div class="user-input-section">
+                        <h3>Additional Description</h3>
+                        <textarea
+                            id="userPrompt"
+                            placeholder="Extra details not in selectors: e.g. 'wearing a red cap, lazy eye, burn marks on right side, approximately 5'8 tall, thin build...'"
+                        ></textarea>
+                        <h3>Reference Image (Optional)</h3>
+                        <div class="ref-upload-area">
+                            <label
+                                class="ref-upload-btn"
+                                for="refImageInput"
+                                id="refImageLabel"
+                            >
+                                Upload Reference Image
+                            </label>
+                            <input
+                                type="file"
+                                id="refImageInput"
+                                accept="image/*"
+                                style="display: none"
+                            />
+                            <img
+                                class="ref-preview"
+                                id="refPreview"
+                                alt="Reference preview"
+                            />
+                        </div>
+                        <div
+                            style="
+                                font-size: 10px;
+                                color: #555;
+                                margin-top: 2px;
+                            "
+                        >
+                            CCTV capture, blurry photo, side angle — model will
+                            recreate as sketch
+                        </div>
+                    </div>
                 </div>
 
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" id="copyPromptBtn" disabled>
-                        Copy Prompt
-                    </button>
-                    <button class="btn btn-primary" id="generateBtn" disabled>
-                        Generate Sketch
-                    </button>
-                    <button class="btn btn-secondary" id="clearBtn">
-                        Clear Selection
-                    </button>
+                <!-- RIGHT: Canvas & actions -->
+                <div class="canvas-panel">
+                    <div class="canvas-top">
+                        <div id="statusBar" class="status-bar"></div>
+
+                        <div class="canvas-container" id="canvasContainer">
+                            <div class="canvas-placeholder" id="placeholder">
+                                Select features & generate
+                            </div>
+                            <img
+                                id="resultImage"
+                                style="display: none"
+                                alt="Generated face"
+                            />
+                            <canvas id="drawingCanvas"></canvas>
+                        </div>
+
+                        <div class="draw-toolbar" id="drawToolbar">
+                            <button
+                                class="btn btn-secondary"
+                                id="toggleDrawBtn"
+                                style="font-size: 11px; padding: 6px 10px"
+                            >
+                                &#9998; Draw
+                            </button>
+                            <div
+                                class="color-btn active"
+                                style="background: #000"
+                                data-color="#000000"
+                            ></div>
+                            <div
+                                class="color-btn"
+                                style="background: #fff"
+                                data-color="#ffffff"
+                            ></div>
+                            <div
+                                class="color-btn"
+                                style="background: #dc3545"
+                                data-color="#dc3545"
+                            ></div>
+                            <label>Size</label>
+                            <input
+                                type="range"
+                                id="brushSize"
+                                min="1"
+                                max="20"
+                                value="3"
+                            />
+                            <button
+                                class="btn btn-secondary"
+                                id="clearDrawBtn"
+                                style="font-size: 11px; padding: 6px 10px"
+                            >
+                                Clear
+                            </button>
+                        </div>
+
+                        <div
+                            class="revision-area"
+                            id="revisionArea"
+                            style="display: none"
+                        >
+                            <textarea
+                                id="revisionPrompt"
+                                placeholder="Describe changes: e.g. make the nose wider, add a scar on left cheek..."
+                            ></textarea>
+                        </div>
+
+                        <div class="match-section" id="matchSection">
+                            <h3>Criminal DB Matches</h3>
+                            <div class="match-grid" id="matchGrid"></div>
+                        </div>
+
+                        <div id="promptDisplay"></div>
+                    </div>
+
+                    <div class="canvas-actions">
+                        <div class="btn-row">
+                            <button
+                                class="btn btn-primary"
+                                id="generateBtn"
+                                disabled
+                            >
+                                Generate Sketch
+                            </button>
+                            <button class="btn btn-secondary" id="clearBtn">
+                                Clear
+                            </button>
+                        </div>
+                        <div
+                            class="btn-row"
+                            id="postGenActions"
+                            style="display: none"
+                        >
+                            <button class="btn btn-outline" id="reviseBtn">
+                                Revise
+                            </button>
+                            <button class="btn btn-primary" id="colorizeBtn">
+                                Colorize
+                            </button>
+                        </div>
+                        <button
+                            class="btn btn-secondary"
+                            id="copyPromptBtn"
+                            disabled
+                            style="display: none"
+                        >
+                            Copy Prompt
+                        </button>
+                    </div>
                 </div>
-
-                <div id="promptDisplay" style="display: none; background: #1a1a1a; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 12px; color: #888; max-height: 100px; overflow-y: auto;"></div>
-
-                <div id="resultContainer"></div>
             </div>
         </div>
-    </div>
 
-    <script src="/static/app.js"></script>
-</body>
+        <script src="/static/app.js"></script>
+    </body>
 </html>
+

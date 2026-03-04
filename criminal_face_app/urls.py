@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -22,12 +23,16 @@ from rest_framework.routers import DefaultRouter
 from face_generator import views
 
 router = DefaultRouter()
-router.register(r'categories', views.FaceFeatureCategoryViewSet)
-router.register(r'features', views.FaceFeatureViewSet)
-router.register(r'compositions', views.FaceCompositionViewSet)
+router.register(r"categories", views.FaceFeatureCategoryViewSet)
+router.register(r"features", views.FaceFeatureViewSet)
+router.register(r"compositions", views.FaceCompositionViewSet)
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
-    path('api/', include(router.urls)),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns = (
+    [
+        path("admin/", admin.site.urls),
+        path("", views.index, name="index"),
+        path("api/", include(router.urls)),
+    ]
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    + static("criminalDB/", document_root=settings.BASE_DIR / "criminalDB")
+)

@@ -67,33 +67,37 @@ Then open: http://localhost:8000
 ## Usage
 
 ### Generate Sketch
+
 1. Select facial features in the web interface
 2. Click "Generate Sketch"
 3. Wait for MFLUX to generate (~10-20s)
 
 ### Revise Sketch
+
 1. After generating, click "Revise"
 2. Enter changes: "make the nose larger", "add facial hair"
 3. Adjust strength (0.3-0.8 recommended)
 
 ### Colorize
+
 1. After generating, click "Colorize"
 2. Optionally add color details: "fair skin, black hair"
 3. Wait for colorization
 
 ## Performance on M4 MacBook Air (16GB)
 
-| Task | Quality | Steps | Time |
-|------|---------|-------|------|
-| Sketch | Fast | 8 | ~15-20s |
-| Sketch | Balanced | 12 | ~25-35s |
-| Sketch | Best | 20 | ~45-60s |
-| Revision | Balanced | 12 | ~25-35s |
-| Colorize | Balanced | 15 | ~35-45s |
+| Task     | Quality  | Steps | Time    |
+| -------- | -------- | ----- | ------- |
+| Sketch   | Fast     | 8     | ~15-20s |
+| Sketch   | Balanced | 12    | ~25-35s |
+| Sketch   | Best     | 20    | ~45-60s |
+| Revision | Balanced | 12    | ~25-35s |
+| Colorize | Balanced | 15    | ~35-45s |
 
 ## MFLUX CLI Reference
 
 ### Basic Generation with Flux 2.1 Klein 4B
+
 ```bash
 mflux-generate \
     --model flux2-klein-4b \
@@ -106,6 +110,7 @@ mflux-generate \
 ```
 
 ### Image-to-Image (Revision/Colorization)
+
 ```bash
 mflux-generate \
     --model flux2-klein-4b \
@@ -119,22 +124,23 @@ mflux-generate \
 
 ### Parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `--model` | Model: `flux2-klein-4b`, `flux2-klein-9b`, `schnell`, `dev` | - |
-| `--quantize` | Quantization: 3, 4, 5, 6, or 8 bit | None |
-| `--steps` | Inference steps (8-50) | varies |
-| `--guidance` | CFG scale (1.0-10.0) | 3.5 |
-| `--width` | Image width | 1024 |
-| `--height` | Image height | 1024 |
-| `--image-path` | Input image for img2img | None |
-| `--image-strength` | Denoising strength (0.0-1.0) | 0.4 |
+| Parameter          | Description                                                 | Default |
+| ------------------ | ----------------------------------------------------------- | ------- |
+| `--model`          | Model: `flux2-klein-4b`, `flux2-klein-9b`, `schnell`, `dev` | -       |
+| `--quantize`       | Quantization: 3, 4, 5, 6, or 8 bit                          | None    |
+| `--steps`          | Inference steps (8-50)                                      | varies  |
+| `--guidance`       | CFG scale (1.0-10.0)                                        | 3.5     |
+| `--width`          | Image width                                                 | 1024    |
+| `--height`         | Image height                                                | 1024    |
+| `--image-path`     | Input image for img2img                                     | None    |
+| `--image-strength` | Denoising strength (0.0-1.0)                                | 0.4     |
 
 ## API Endpoints
 
 The Django app provides three endpoints for face generation:
 
 ### 1. Generate Sketch
+
 ```bash
 POST /api/compositions/{id}/generate_sketch/
 
@@ -142,6 +148,7 @@ POST /api/compositions/{id}/generate_sketch/
 ```
 
 ### 2. Revise Sketch
+
 ```bash
 POST /api/compositions/{id}/revise_sketch/
 Content-Type: application/json
@@ -157,6 +164,7 @@ Content-Type: application/json
 ```
 
 ### 3. Colorize Sketch
+
 ```bash
 POST /api/compositions/{id}/colorize/
 Content-Type: application/json
@@ -179,6 +187,7 @@ Content-Type: application/json
 ## Troubleshooting
 
 ### "mflux-generate not found"
+
 ```bash
 pip install mflux
 
@@ -188,20 +197,25 @@ pip install mflux
 ```
 
 ### Slow First Generation
+
 The first run downloads the Flux Schnell model (~12GB). Subsequent runs are much faster.
 
 ### Out of Memory
+
 - Close other applications
 - Use `--width 512 --height 512` for testing
 - Use `quality="fast"` (fewer steps)
 
 ### "Metal device not found"
+
 Ensure you're on macOS with Apple Silicon:
+
 ```bash
 python -c "import mlx.core as mx; print(mx.metal.is_available())"
 ```
 
 ### Generation Fails
+
 ```bash
 # Check model is downloaded
 ls ~/.cache/huggingface/hub/models--*flux*
@@ -246,13 +260,14 @@ colorize_sketch(
 
 ## Model Information
 
-| Model | Parameters | Quantized Size | Description |
-|-------|------------|----------------|-------------|
-| Flux 2.1 Klein 4B | 4B | ~4GB (4-bit) | Optimized for speed, good quality |
-| Flux 2.1 Klein 9B | 9B | ~8GB (4-bit) | Higher quality, slower |
+| Model             | Parameters | Quantized Size | Description                       |
+| ----------------- | ---------- | -------------- | --------------------------------- |
+| Flux 2.1 Klein 4B | 4B         | ~4GB (4-bit)   | Optimized for speed, good quality |
+| Flux 2.1 Klein 9B | 9B         | ~8GB (4-bit)   | Higher quality, slower            |
 
 ## Resources
 
 - [MFLUX GitHub](https://github.com/filipstrand/mflux)
 - [MLX Framework](https://github.com/ml-explore/mlx)
 - [Flux 2.1 Klein on Hugging Face](https://huggingface.co/black-forest-labs/FLUX.2-klein-4B)
+
