@@ -2,7 +2,7 @@
 Face Matching Module
 Compares a generated face against criminal database images using OpenCV.
 
-Uses histogram comparison + structural similarity for matching.
+Uses histogram comparison + SSIM structural similarity for matching.
 No heavy ML dependencies — works with cv2 + numpy already installed.
 """
 
@@ -12,7 +12,7 @@ import numpy as np
 from typing import Optional
 
 
-# Cache for pre-computed criminal DB data (histograms)
+# Cache for pre-computed criminal DB data
 _criminal_cache: dict = {}
 
 
@@ -34,29 +34,52 @@ def _compute_face_histogram(image_path: str) -> Optional[np.ndarray]:
     return hist
 
 
-def _compute_structural_features(image_path: str) -> Optional[np.ndarray]:
-    """Extract structural features using edge detection + pixel intensity."""
+def _load_grayscale_structural_image(image_path: str) -> Optional[np.ndarray]:
+    """Load grayscale image resized for structural similarity (SSIM)."""
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         return None
 
-    # Resize to standard
+    # Resize to standard dimensions for fair SSIM comparison
     img = cv2.resize(img, (128, 128))
+    return img
 
-    # Extract edge features (structural similarity for face shapes)
-    edges = cv2.Canny(img, 50, 150)
 
-    # Combine normalized grayscale + edges as feature vector
-    gray_flat = img.flatten().astype(np.float32) / 255.0
-    edge_flat = edges.flatten().astype(np.float32) / 255.0
+def _compute_ssim(gray_a: np.ndarray, gray_b: np.ndarray) -> float:
+    """Compute SSIM score between two grayscale images using OpenCV + numpy."""
+    img1 = gray_a.astype(np.float32)
+    img2 = gray_b.astype(np.float32)
 
-    return np.concatenate([gray_flat, edge_flat])
+    # SSIM constants for L=255
+    c1 = (0.01 * 255) ** 2
+    c2 = (0.03 * 255) ** 2
+
+    kernel_size = (11, 11)
+    sigma = 1.5
+
+    mu1 = cv2.GaussianBlur(img1, kernel_size, sigma)
+    mu2 = cv2.GaussianBlur(img2, kernel_size, sigma)
+
+    mu1_sq = mu1 * mu1
+    mu2_sq = mu2 * mu2
+    mu1_mu2 = mu1 * mu2
+
+    sigma1_sq = cv2.GaussianBlur(img1 * img1, kernel_size, sigma) - mu1_sq
+    sigma2_sq = cv2.GaussianBlur(img2 * img2, kernel_size, sigma) - mu2_sq
+    sigma12 = cv2.GaussianBlur(img1 * img2, kernel_size, sigma) - mu1_mu2
+
+    ssim_map = ((2 * mu1_mu2 + c1) * (2 * sigma12 + c2)) / (
+        (mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2)
+    )
+
+    score = float(np.mean(ssim_map))
+    return max(0.0, min(1.0, score))
 
 
 def _load_criminal_db(criminal_db_path: str) -> dict:
     """
     Load and cache criminal DB image data.
-    Returns dict of {criminal_id: {path, histogram, features}}
+    Returns dict of {criminal_id: {path, histogram, gray_image}}
     """
     global _criminal_cache
 
@@ -73,14 +96,14 @@ def _load_criminal_db(criminal_db_path: str) -> dict:
         filepath = os.path.join(criminal_db_path, filename)
 
         hist = _compute_face_histogram(filepath)
-        features = _compute_structural_features(filepath)
+        gray_image = _load_grayscale_structural_image(filepath)
 
-        if hist is not None and features is not None:
+        if hist is not None and gray_image is not None:
             _criminal_cache[criminal_id] = {
                 "path": filepath,
                 "filename": filename,
                 "histogram": hist,
-                "features": features,
+                "gray_image": gray_image,
             }
 
     print(f"[FaceMatcher] Loaded {len(_criminal_cache)} criminal images")
@@ -106,9 +129,9 @@ def match_face(
     """
     # Compute query features
     query_hist = _compute_face_histogram(query_image_path)
-    query_features = _compute_structural_features(query_image_path)
+    query_gray = _load_grayscale_structural_image(query_image_path)
 
-    if query_hist is None or query_features is None:
+    if query_hist is None or query_gray is None:
         print(f"[FaceMatcher] Could not process query image: {query_image_path}")
         return []
 
@@ -125,16 +148,8 @@ def match_face(
         # Histogram comparison (color similarity) — correlation method
         hist_score = cv2.compareHist(query_hist, data["histogram"], cv2.HISTCMP_CORREL)
 
-        # Structural similarity via cosine similarity of feature vectors
-        query_norm = np.linalg.norm(query_features)
-        data_norm = np.linalg.norm(data["features"])
-
-        if query_norm > 0 and data_norm > 0:
-            struct_score = np.dot(query_features, data["features"]) / (
-                query_norm * data_norm
-            )
-        else:
-            struct_score = 0.0
+        # Structural similarity via SSIM on grayscale images
+        struct_score = _compute_ssim(query_gray, data["gray_image"])
 
         # Combined score: weight structural features more for face matching
         combined = 0.4 * max(hist_score, 0) + 0.6 * max(struct_score, 0)
